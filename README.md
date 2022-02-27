@@ -1,69 +1,392 @@
 # microcms_nuxt_jamstack_portfolio_sample
 
-## Build Setup
+## 0. インデックス
+1. プロジェクトの作成
+1. Sassの設定
+    1. Sassのインストール
+    1. Sass変数と関数を作成する(variables/functions/mixins)
+    1. Sass変数や関数をグローバル化する
+    1. ベーススタイルの設定
+    1. グローバルスタイルの設定
+1. Google Fontsの読み込み
+
+## 1. プロジェクトの作成
 
 ```bash
-# install dependencies
-$ yarn install
-
-# serve with hot reload at localhost:3000
-$ yarn dev
-
-# build for production and launch server
-$ yarn build
-$ yarn start
-
-# generate static project
-$ yarn generate
+$ yarn create nuxt-app portfolio
 ```
 
-For detailed explanation on how things work, check out the [documentation](https://nuxtjs.org).
+## 2. Sassの設定
 
-## Special Directories
+### 2-1. Sassのインストール
 
-You can create the following extra directories, some of which have special behaviors. Only `pages` is required; you can delete them if you don't want to use their functionality.
+```bash
+$ yarn add -D sass sass-loader@10
+```
 
-### `assets`
+### 2-2. Sass変数と関数を作成する
 
-The assets directory contains your uncompiled assets such as Stylus or Sass files, images, or fonts.
+#### assets/scss/settings/_variables.scss
 
-More information about the usage of this directory in [the documentation](https://nuxtjs.org/docs/2.x/directory-structure/assets).
+```scss
+// -------------------------------------------
+// Color Settings
+// -------------------------------------------
+// base
+$base-color-primary: #fff;
+$base-color-secondary: #fafafa;
 
-### `components`
+// text color
+$text-color-primary: #010101;
+$text-color-secondary: #fff;
 
-The components directory contains your Vue.js components. Components make up the different parts of your page and can be reused and imported into your pages, layouts and even other components.
+// key
+$key-color-black: #010101;
 
-More information about the usage of this directory in [the documentation](https://nuxtjs.org/docs/2.x/directory-structure/components).
+// background
+$color-body-background: $base-color-primary;
 
-### `layouts`
+// -------------------------------------------
+// Typeface Settings
+// -------------------------------------------
+$font-base: 'ヒラギノ角ゴ Pro W3', 'Hiragino Kaku Gothic Pro', 'Osaka',
+  'メイリオ', 'Meiryo', 'ＭＳ Ｐゴシック', 'MS P Gothic', sans-serif;
 
-Layouts are a great help when you want to change the look and feel of your Nuxt app, whether you want to include a sidebar or have distinct layouts for mobile and desktop.
+// -------------------------------------------
+// Break Points
+// -------------------------------------------
+$breakpoints: (
+  'sm': 480px,
+  'md': 768px,
+  'lg': 1024px,
+  'xl': 1200px,
+  'xxl': 1440px,
+) !default;
+```
 
-More information about the usage of this directory in [the documentation](https://nuxtjs.org/docs/2.x/directory-structure/layouts).
+#### assets/scss/settings/_functions.scss
 
+```scss
+@use 'sass:math';
 
-### `pages`
+/**
+ * 引数のfontSizeをremに変換する関数
+ * @param fontSize フォントサイズ
+ */
+@function fz($fontSize) {
+  @return math.div($fontSize, 16) * 1rem;
+}
+```
 
-This directory contains your application views and routes. Nuxt will read all the `*.vue` files inside this directory and setup Vue Router automatically.
+#### assets/scss/settings/_mixins.scss
 
-More information about the usage of this directory in [the documentation](https://nuxtjs.org/docs/2.x/get-started/routing).
+```scss
+@use 'sass:map';
+@use 'variables' as var;
+//============================================
+//  MIXIN
+//============================================
+// Media Queries
+@mixin mq($breakpoint: md, $type: min) {
+  @if map.has-key(var.$breakpoints, $breakpoint) {
+    @if ($type == max) {
+      $width: map.get(var.$breakpoints, $breakpoint);
+      $width: $width - 1;
+      @media screen and (max-width: #{$width}) {
+        @content;
+      }
+    } @else if($type == min) {
+      @media screen and (min-width: #{map.get(var.$breakpoints, $breakpoint)}) {
+        @content;
+      }
+    }
+  }
+}
+```
 
-### `plugins`
+#### assets/scss/app.scss
 
-The plugins directory contains JavaScript plugins that you want to run before instantiating the root Vue.js Application. This is the place to add Vue plugins and to inject functions or constants. Every time you need to use `Vue.use()`, you should create a file in `plugins/` and add its path to plugins in `nuxt.config.js`.
+```scss
+@import './settings/variables';
+@import './settings/functions';
+@import './settings/mixins';
+```
 
-More information about the usage of this directory in [the documentation](https://nuxtjs.org/docs/2.x/directory-structure/plugins).
+### 2-3. Sass変数や関数をグローバル化する
 
-### `static`
+```bash
+yarn add -D @nuxtjs/style-resources
+```
 
-This directory contains your static files. Each file inside this directory is mapped to `/`.
+#### nuxt.config.js
 
-Example: `/static/robots.txt` is mapped as `/robots.txt`.
+```javascript
+export default {
+  //...
 
-More information about the usage of this directory in [the documentation](https://nuxtjs.org/docs/2.x/directory-structure/static).
+  buildModules: [
+    '@nuxtjs/style-resources', // 追加
+  ],
 
-### `store`
+  // ...
 
-This directory contains your Vuex store files. Creating a file in this directory automatically activates Vuex.
+  styleResources: {
+    scss: ['~/assets/scss/app.scss'],
+    hoistUseStatements: true,
+  },
+}
+```
 
-More information about the usage of this directory in [the documentation](https://nuxtjs.org/docs/2.x/directory-structure/store).
+### 2-4. ベーススタイルの設定
+[ress](https://github.com/filipelinhares/ress)
+
+```bash
+$ yarn add ress
+```
+
+#### nuxt.config.js
+
+```javascript
+export default {
+  // ...
+
+  css: ['ress'],
+
+  // ...
+}
+```
+
+#### assets/scss/base.scss
+
+```scss
+html {
+  box-sizing: border-box;
+  height: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  height: 100%;
+  font-family: $font-base;
+  font-size: fz(16);
+  line-height: 1.5;
+  color: $text-color-primary;
+  letter-spacing: 0.05em;
+  background-color: $color-body-background;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  vertical-align: bottom;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+strong {
+  font-weight: bold;
+}
+
+input,
+textarea {
+  max-width: 100%;
+  font-family: inherit;
+  font-size: 100%;
+}
+```
+
+#### nuxt.config.js
+
+```javascript
+export default {
+  // ...
+
+  css: ['ress', '~/assets/scss/base.scss'],
+
+  // ...
+}
+```
+
+### 2-5. グローバルスタイルの設定
+
+#### assets/scss/global.scss
+
+```scss
+.visuallyHidden {
+  position: absolute;
+  top: 0;
+  left: 0;
+  white-space: nowrap;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  border: 0;
+  padding: 0;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  margin: -1px;
+}
+
+.container {
+  max-width: 780px;
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+
+  &--lg {
+    max-width: 960px;
+  }
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.child {
+  padding-bottom: 5em;
+}
+
+.background--gray {
+  background-color: $base-color-secondary;
+}
+
+.sectionPrimary {
+  padding: 5em 0;
+
+  @include mq() {
+    padding: 7.5em 0;
+  }
+}
+
+.headingPrimary {
+  font-family: $font-ubuntu;
+  font-size: fz(40);
+  font-weight: bold;
+  text-transform: capitalize;
+  text-align: center;
+  margin-bottom: 1em;
+}
+
+.button-area {
+  text-align: center;
+  margin-top: 2em;
+
+  @include mq() {
+    margin-top: 2.5em;
+  }
+}
+
+.buttonPrimary {
+  color: $key-color-black;
+  display: inline-block;
+  font-family: $font-ubuntu;
+  font-size: fz(18);
+  font-weight: bold;
+  text-transform: capitalize;
+  text-align: center;
+  text-indent: -1em;
+  line-height: 56px;
+  padding: 0 1em;
+  border: 2px solid;
+  border-radius: 4px;
+  min-width: 230px;
+  position: relative;
+
+  &::after {
+    content: '';
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTkuNzUgNy41MDI0NEwxNSAxMi4wMDAyTDkuNzUgMTYuNTAyNCIgc3Ryb2tlPSIjMDEwMTAxIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1taXRlcmxpbWl0PSIxMCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cjwvc3ZnPgo=)
+      center no-repeat;
+    background-size: contain;
+    position: absolute;
+    top: 50%;
+    right: 1em;
+    transform: translateY(-50%);
+    transition: all 0.3s ease-in-out;
+  }
+
+  &:hover {
+    &::after {
+      transform: translate(5px, -50%);
+    }
+  }
+
+  &--leftArrow {
+    text-indent: 1em;
+
+    &::after {
+      background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE0LjI1IDcuNTAyNDRMOSAxMi4wMDAyTDE0LjI1IDE2LjUwMjQiIHN0cm9rZT0iIzAxMDEwMSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbWl0ZXJsaW1pdD0iMTAiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K);
+      background-size: contain;
+      right: inherit;
+      left: 1em;
+    }
+
+    &:hover {
+      &::after {
+        transform: translate(-5px, -50%);
+      }
+    }
+  }
+}
+```
+
+```javascript
+export default {
+  // ...
+
+  css: ['ress', '~/assets/scss/base.scss', '~/assets/scss/global.scss'],
+
+  // ...
+}
+```
+
+## 3. Google Fontsの読み込み
+
+```bash
+$ yarn add nuxt-webfontloader
+```
+
+#### nuxt.config.js
+
+```javascript
+export default {
+  // ...
+
+  modules: [
+    'nuxt-webfontloader',
+  ],
+
+  //...
+
+  webfontloader: {
+    google: {
+      families: ['Ubuntu:wght@400,700&display=swap'],
+    },
+  },
+
+  // ...
+}
+```
+
+#### assets/scss/settings/_variables.scss
+
+```scss
+$font-ubuntu: 'Ubuntu', sans-serif;
+```
