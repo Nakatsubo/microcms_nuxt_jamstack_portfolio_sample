@@ -9,6 +9,7 @@
     1. ベーススタイルの設定
     1. グローバルスタイルの設定
 1. Google Fontsの読み込み
+1. ヘッダーとフッターの作成
 
 ## 1. プロジェクトの作成
 
@@ -389,4 +390,173 @@ export default {
 
 ```scss
 $font-ubuntu: 'Ubuntu', sans-serif;
+```
+
+## 4. ヘッダーとフッターの作成
+
+#### components/TheHeader.vue
+
+```html
+<template>
+  <header class="header">
+    <div class="headerContainer">
+      <!-- ロゴ -->
+      <component :is="isTopPage ? 'h1' : 'p'" class="logo">
+        <nuxt-link to="/">My Portfolio</nuxt-link>
+      </component>
+
+      <!-- メニュー -->
+      <nav>
+        <ul class="menu">
+          <li>
+            <nuxt-link to="/#about" class="menu__link">about</nuxt-link>
+          </li>
+          <li>
+            <nuxt-link to="/works" class="menu__link">works</nuxt-link>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+</template>
+
+<script>
+export default {
+  computed: {
+    // TOPページかどうか
+    isTopPage() {
+      if (this.$route.name === 'index') return true
+      return false
+    },
+  },
+}
+</script>
+
+<style lang="scss" scoped>
+.header {
+  width: 100%;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  background-color: $base-color-primary;
+}
+
+.headerContainer {
+  padding: 0 1.5em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  @include mq() {
+    padding: 0 4em;
+  }
+}
+
+.logo {
+  color: $text-color-primary;
+  font-family: $font-ubuntu;
+  font-size: fz(18);
+  font-weight: bold;
+  letter-spacing: 0;
+
+  @include mq() {
+    font-size: fz(24);
+  }
+}
+
+.menu {
+  list-style: none;
+  display: flex;
+  margin-right: -0.75em;
+
+  &__link {
+    font-family: $font-ubuntu;
+    font-weight: bold;
+    text-transform: capitalize;
+    line-height: 64px;
+    display: inline-block;
+    padding: 0 0.25em;
+    position: relative;
+
+    @include mq() {
+      padding: 0 0.75em;
+    }
+
+    &::after {
+      content: '';
+      display: block;
+      width: 0;
+      height: 2px;
+      background-color: $key-color-black;
+      transition: all 0.3s ease-in-out;
+      position: absolute;
+      left: 0;
+      bottom: 0;
+    }
+
+    &:hover {
+      &::after {
+        width: 100%;
+      }
+    }
+  }
+}
+</style>
+```
+
+#### components/TheFooter.vue
+
+```html
+<template>
+  <footer class="footer">
+    <p class="copyright">
+      <small>©️2021 My Portfolio All Rights Reserved.</small>
+    </p>
+  </footer>
+</template>
+
+<style lang="scss" scoped>
+.footer {
+  padding: 1em 0;
+  background-color: $base-color-secondary;
+}
+
+.copyright {
+  font-size: fz(14);
+  font-family: $font-ubuntu;
+  text-align: center;
+}
+</style>
+```
+
+#### layouts/default.vue
+ヘッダーとフッターはサイト全体で共通化する
+
+```html
+<template>
+  <div class="wrapper">
+    <TheHeader class="header" />
+    <main class="main">
+      <Nuxt />
+    </main>
+    <TheFooter />
+  </div>
+</template>
+
+<style lang="scss" scoped>
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.header {
+  position: fixed;
+  z-index: 100;
+}
+
+.main {
+  flex: 1;
+  overflow-x: hidden;
+  padding-top: 4em;
+}
+</style>
 ```
