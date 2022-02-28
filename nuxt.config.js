@@ -40,7 +40,8 @@ export default {
 
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
-    'nuxt-webfontloader',
+    'nuxt-webfontloader', // 追加
+    'nuxt-microcms-module', // 追加
   ],
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
@@ -56,5 +57,12 @@ export default {
     google: {
       families: ['Ubuntu:wght@400,700&display=swap'],
     },
+  },
+  microcms: {
+    options: {
+      serviceDomain: process.env.SERVICE_DOMAIN,
+      apiKey: process.env.GET_API_KEY,
+    },
+    mode: process.env.NODE_ENV === 'production' ? 'server' : 'all',
   },
 }

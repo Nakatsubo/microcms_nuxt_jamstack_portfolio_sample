@@ -12,6 +12,10 @@
 1. ヘッダーとフッターの作成
 1. 各ページのコーディング
     1. TOPページ
+    1. Works一覧ペー
+    1. Works詳細ページ
+1. 環境変数を作成
+1. nuxt-microcms-moduleのインストールと設定
 
 ## 1. プロジェクトの作成
 
@@ -1143,4 +1147,53 @@ microCMSのAPIを流し込む想定で各ページをコーディングする
   }
 }
 </style>
+```
+
+## 6. 環境変数を作成
+
+#### .env
+
+```
+GET_API_KEY=your_api_key
+SERVICE_DOMAIN=your_service_domain
+```
+
+## 7. nuxt-microcms-moduleのインストールと設定
+
+```bash
+$ yarn add nuxt-microcms-module
+```
+
+#### nuxt.config.js
+
+```javascript
+export default {
+
+  // ...
+
+  modules: [
+    'nuxt-webfontloader', // 追加
+    'nuxt-microcms-module',
+  ],
+
+  // ...
+  
+  styleResources: {
+    scss: ['~/assets/scss/app.scss'],
+    hoistUseStatements: true,
+  },
+  webfontloader: {
+    google: {
+      families: ['Ubuntu:wght@400,700&display=swap'],
+    },
+  },
+  // 追加
+  microcms: {
+    options: {
+      serviceDomain: process.env.SERVICE_DOMAIN,
+      apiKey: process.env.GET_API_KEY,
+    },
+    mode: process.env.NODE_ENV === 'production' ? 'server' : 'all',
+  },
+}
 ```
