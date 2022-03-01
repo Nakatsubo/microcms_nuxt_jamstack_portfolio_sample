@@ -20,6 +20,7 @@
     1. TOPページ
     1. Works一覧ページ
     1. Works詳細ページ
+1. date-fnsモジュールを使用し日付をフォーマット
 
 ## 1. プロジェクトの作成
 
@@ -1411,4 +1412,10 @@ export default {
 </script>
 
 // ...
+```
+
+## 9. date-fnsモジュールを使用し日付をフォーマット
+
+```bash
+$ yarn add --dev @nuxtjs/date-fns
 ```
