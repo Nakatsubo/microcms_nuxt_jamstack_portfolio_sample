@@ -1,14 +1,23 @@
 <template>
   <div>
+    <!-- ここから差し替え -->
     <div class="mainVisual">
       <picture>
         <source
-          srcset="https://placehold.jp/375x530.png"
+          :width="settings.mainVisualSp.width"
+          :height="settings.mainVisualSp.height"
+          :srcset="settings.mainVisualSp.url"
           media="(max-width: 767px)"
         />
-        <img src="https://placehold.jp/1440x436.png" alt="" />
+        <img
+          :width="settings.mainVisualPc.width"
+          :height="settings.mainVisualPc.height"
+          :src="settings.mainVisualPc.url"
+          alt=""
+        />
       </picture>
     </div>
+    <!-- 差し替えここまで -->
 
     <section id="about" class="sectionPrimary">
       <div class="container">
@@ -17,24 +26,28 @@
           <div class="profile__upper">
             <div class="profile__text">
               <p class="profile__name">
-                山田 太郎<span lang="en">Taro Yamada</span>
+                <span>{{ settings.name }}</span>
+                <span lang="en">{{ settings.nameEnglish }}</span>
               </p>
               <dl class="profile__item">
                 <dt class="profile__title">技術スタック</dt>
-                <dd>HTML / CSS / jQuery / JavaScript / Nuxt</dd>
+                <dd>{{ settings.skills }}</dd>
               </dl>
               <dl class="profile__item">
                 <dt class="profile__title">趣味</dt>
-                <dd>開発、ゲーム、YouTube、ライブ、音楽フェス、ピアノ、卓球</dd>
+                <dd>{{ settings.hobby }}</dd>
               </dl>
             </div>
             <figure class="profile__image">
-              <img src="https://placehold.jp/260x260.png" alt="your name" />
+              <img
+                :width="settings.profileImage.width"
+                :height="settings.profileImage.height"
+                :src="settings.profileImage.url"
+                :alt="settings.name"
+              />
             </figure>
           </div>
-          <p class="profile__message">
-            自己紹介を入れましょう。出身や経歴と現在の仕事の内容を簡単に話すも良し。<br />数年後の目標や今学んでいること、活動している内容を入れるのも良いかと思います。
-          </p>
+          <p class="profile__message">{{ settings.message }}</p>
         </div>
       </div>
     </section>
@@ -77,11 +90,16 @@
 <script>
 export default {
   async asyncData({ $microcms }) {
+    const settings = await $microcms.get({
+      endpoint: 'settings',
+    })
+
     const works = await $microcms.get({
       endpoint: 'works',
       queries: { limit: 2 },
     })
     return {
+      settings,
       works,
     }
   },
