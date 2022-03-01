@@ -1419,3 +1419,41 @@ export default {
 ```bash
 $ yarn add --dev @nuxtjs/date-fns
 ```
+
+#### nuxt.config.js
+
+```javascript
+export default {
+
+  // ...
+
+  // Modules: https://go.nuxtjs.dev/config-modules
+  modules: [
+    'nuxt-webfontloader', // 追加
+    'nuxt-microcms-module', // 追加
+  ],
+
+  // ...
+
+}
+```
+
+#### pages/works/_id/index.vue
+
+```html
+// ...
+
+<dl v-if="work.release" class="worksMainVisual__item">
+  <dt class="worksMainVisual__itemName">リリース日</dt>
+  <dd>
+    <!-- 差し替えここから -->
+    <time
+      :datetime="work.release"
+      v-text="$dateFns.format(new Date(work.release), 'yyyy.MM.dd')"
+    />
+    <!-- 差し替えここまで -->
+  </dd>
+</dl>
+
+// ...
+```

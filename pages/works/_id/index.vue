@@ -7,7 +7,12 @@
           <dl v-if="work.release" class="worksMainVisual__item">
             <dt class="worksMainVisual__itemName">リリース日</dt>
             <dd>
-              <time :datetime="work.release">{{ work.release }}</time>
+              <!-- 差し替えここから -->
+              <time
+                :datetime="work.release"
+                v-text="$dateFns.format(new Date(work.release), 'yyyy.MM.dd')"
+              />
+              <!-- 差し替えここまで -->
             </dd>
           </dl>
           <dl v-if="work.term" class="worksMainVisual__item">
