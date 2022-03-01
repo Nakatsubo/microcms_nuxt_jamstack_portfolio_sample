@@ -12,10 +12,16 @@
 1. ヘッダーとフッターの作成
 1. 各ページのコーディング
     1. TOPページ
-    1. Works一覧ペー
+    1. Works一覧ページ
     1. Works詳細ページ
 1. 環境変数を作成
 1. nuxt-microcms-moduleのインストールと設定
+1. APIを取得
+    1. TOPページ
+    1. Works一覧ページ
+    1. Works詳細ページ
+1. date-fnsモジュールを使用し日付をフォーマット
+1. プロフィール画面の作成（おまけ）
 
 ## 1. プロジェクトの作成
 
@@ -1197,3 +1203,496 @@ export default {
   },
 }
 ```
+
+## 8. APIを取得
+
+#### pages/index.vue
+
+```html
+// ...
+
+<div class="container">
+  <!-- 差し替えここから -->
+  <ol class="row works">
+    <li v-for="work in works.contents" :key="work.id" class="works__item">
+      <nuxt-link :to="`/works/${work.id}/`" class="works__inner">
+        <figure class="works__image">
+          <img
+            :width="work.thumbnail.width"
+            :height="work.thumbnail.height"
+            :src="work.thumbnail.url"
+            :alt="work.title"
+          />
+        </figure>
+        <div class="works__text">
+          <p class="works__name">{{ work.title }}</p>
+          <p class="works__date">
+            <time :datetime="work.release">{{ work.release }}</time>
+          </p>
+        </div>
+      </nuxt-link>
+    </li>
+  </ol>
+  <!-- 差し替えここまで -->
+</div>
+
+// ...
+
+<script>
+export default {
+  async asyncData({ $microcms }) {
+    const works = await $microcms.get({
+      endpoint: 'works',
+      queries: { limit: 2 },
+    })
+    return {
+      works,
+    }
+  },
+}
+</script>
+
+// ...
+```
+
+#### pages/works/index.vue
+
+```html
+// ...
+
+<section class="sectionPrimary background--gray">
+  <div class="container">
+    <h2 class="headingPrimary">works</h2>
+    <!-- 差し替えここから -->
+    <ol class="row works">
+      <li v-for="work in works.contents" :key="work.id" class="works__item">
+        <nuxt-link :to="`/works/${work.id}/`" class="works__inner">
+          <figure class="works__image">
+            <img
+              :width="work.thumbnail.width"
+              :height="work.thumbnail.height"
+              :src="work.thumbnail.url"
+              :alt="work.title"
+            />
+          </figure>
+          <div class="works__text">
+            <p class="works__name">{{ work.title }}</p>
+            <p class="works__date">
+              <time :datetime="work.release">{{ work.release }}</time>
+            </p>
+          </div>
+        </nuxt-link>
+      </li>
+    </ol>
+    <!-- 差し替えここまで -->
+    <p class="button-area">
+      <nuxt-link to="/works" class="buttonPrimary">view more</nuxt-link>
+    </p>
+  </div>
+</section>
+
+// ...
+
+<script>
+export default {
+  async asyncData({ $microcms }) {
+    const works = await $microcms.get({
+      endpoint: 'works',
+    })
+    return {
+      works,
+    }
+  },
+}
+</script>
+
+// ...
+```
+
+#### pages/works/_id/index.vue
+必須項目ではないものにはv-ifを使用してレンダリングさせないようにする
+
+```html
+<template>
+  <div class="child">
+    <div class="worksMainVisual">
+      <div class="container container--lg worksMainVisual__inner">
+        <div class="worksMainVisual__contents">
+          <h1 class="worksMainVisual__title">{{ work.title }}</h1>
+          <dl v-if="work.release" class="worksMainVisual__item">
+            <dt class="worksMainVisual__itemName">リリース日</dt>
+            <dd>
+              <time :datetime="work.release">{{ work.release }}</time>
+            </dd>
+          </dl>
+          <dl v-if="work.term" class="worksMainVisual__item">
+            <dt class="worksMainVisual__itemName">制作期間</dt>
+            <dd>{{ work.term }}</dd>
+          </dl>
+          <p v-if="work.overview">{{ work.overview }}</p>
+        </div>
+        <figure class="worksMainVisual__thumbnail">
+          <img
+            :width="work.thumbnail.width"
+            :height="work.thumbnail.height"
+            :src="work.thumbnail.url"
+            :alt="work.title"
+          />
+        </figure>
+      </div>
+    </div>
+
+    <div class="container">
+      <dl class="worksItem">
+        <dt class="worksItem__title">URL</dt>
+        <dd class="worksItem__contents">
+          <a :href="work.url" target="_blank">{{ work.url }}</a>
+        </dd>
+      </dl>
+      <dl v-if="work.position" class="worksItem">
+        <dt class="worksItem__title">ポジション</dt>
+        <dd class="worksItem__contents">{{ work.position }}</dd>
+      </dl>
+      <dl v-if="work.responsibility" class="worksItem">
+        <dt class="worksItem__title">担当</dt>
+        <dd class="worksItem__contents">
+          <span
+            v-for="(res, resIndex) in work.responsibility"
+            :key="resIndex"
+            v-text="res"
+          />
+        </dd>
+      </dl>
+      <dl class="worksItem">
+        <dt class="worksItem__title">技術</dt>
+        <dd class="worksItem__contents">
+          <span
+            v-for="(skill, skillIndex) in work.skill"
+            :key="skillIndex"
+            v-text="skill"
+          />
+        </dd>
+      </dl>
+      <dl v-if="work.tools" class="worksItem">
+        <dt class="worksItem__title">ツール</dt>
+        <dd class="worksItem__contents">
+          <span
+            v-for="(tool, toolIndex) in work.tools"
+            :key="toolIndex"
+            v-text="tool"
+          />
+        </dd>
+      </dl>
+      <dl class="worksItem">
+        <dt class="worksItem__title">アピールポイント</dt>
+        <dd class="worksItem__contents">{{ work.points }}</dd>
+      </dl>
+    </div>
+
+    <p class="button-area">
+      <nuxt-link to="/works" class="buttonPrimary buttonPrimary--leftArrow"
+        >back</nuxt-link
+      >
+    </p>
+  </div>
+</template>
+
+// ...
+
+<script>
+export default {
+  async asyncData({ $microcms, params }) {
+    const work = await $microcms.get({
+      endpoint: `works/${params.id}`,
+    })
+    return {
+      work,
+    }
+  },
+}
+</script>
+
+// ...
+```
+
+## 9. date-fnsモジュールを使用し日付をフォーマット
+
+```bash
+$ yarn add --dev @nuxtjs/date-fns
+```
+
+#### nuxt.config.js
+
+```javascript
+export default {
+
+  // ...
+
+  // Modules: https://go.nuxtjs.dev/config-modules
+  modules: [
+    'nuxt-webfontloader', // 追加
+    'nuxt-microcms-module', // 追加
+  ],
+
+  // ...
+
+}
+```
+
+#### pages/works/_id/index.vue
+
+```html
+// ...
+
+<dl v-if="work.release" class="worksMainVisual__item">
+  <dt class="worksMainVisual__itemName">リリース日</dt>
+  <dd>
+    <!-- 差し替えここから -->
+    <time
+      :datetime="work.release"
+      v-text="$dateFns.format(new Date(work.release), 'yyyy.MM.dd')"
+    />
+    <!-- 差し替えここまで -->
+  </dd>
+</dl>
+
+// ...
+```
+
+## 10. プロフィール画面の作成（おまけ）
+
+#### pages/index.vue
+
+```html
+<template>
+  <div>
+    <!-- ここから差し替え -->
+    <div class="mainVisual">
+      <picture>
+        <source
+          :width="settings.mainVisualSp.width"
+          :height="settings.mainVisualSp.height"
+          :srcset="settings.mainVisualSp.url"
+          media="(max-width: 767px)"
+        />
+        <img
+          :width="settings.mainVisualPc.width"
+          :height="settings.mainVisualPc.height"
+          :src="settings.mainVisualPc.url"
+          alt=""
+        />
+      </picture>
+    </div>
+    <!-- 差し替えここまで -->
+
+    <section id="about" class="sectionPrimary">
+      <div class="container">
+        <h2 class="headingPrimary">about</h2>
+        <!-- ここから差し替え -->
+        <div class="profile">
+          <div class="profile__upper">
+            <div class="profile__text">
+              <p class="profile__name">
+                <span>{{ settings.name }}</span>
+                <span lang="en">{{ settings.nameEnglish }}</span>
+              </p>
+              <dl class="profile__item">
+                <dt class="profile__title">技術スタック</dt>
+                <dd>{{ settings.skills }}</dd>
+              </dl>
+              <dl class="profile__item">
+                <dt class="profile__title">趣味</dt>
+                <dd>{{ settings.hobby }}</dd>
+              </dl>
+            </div>
+            <figure class="profile__image">
+              <img
+                :width="settings.profileImage.width"
+                :height="settings.profileImage.height"
+                :src="settings.profileImage.url"
+                :alt="settings.name"
+              />
+            </figure>
+          </div>
+          <p class="profile__message">{{ settings.message }}</p>
+        </div>
+        <!-- 差し替えここまで -->
+      </div>
+    </section>
+
+    <section class="sectionPrimary background--gray">
+      <div class="container">
+        <h2 class="headingPrimary">works</h2>
+
+        <!-- 差し替えここから -->
+        <ol class="row works">
+          <li v-for="work in works.contents" :key="work.id" class="works__item">
+            <nuxt-link :to="`/works/${work.id}/`" class="works__inner">
+              <figure class="works__image">
+                <img
+                  :width="work.thumbnail.width"
+                  :height="work.thumbnail.height"
+                  :src="work.thumbnail.url"
+                  :alt="work.title"
+                />
+              </figure>
+              <div class="works__text">
+                <p class="works__name">{{ work.title }}</p>
+                <p class="works__date">
+                  <time :datetime="work.release">{{ work.release }}</time>
+                </p>
+              </div>
+            </nuxt-link>
+          </li>
+        </ol>
+        <!-- 差し替えここまで -->
+
+        <p class="button-area">
+          <nuxt-link to="/works" class="buttonPrimary">view more</nuxt-link>
+        </p>
+      </div>
+    </section>
+  </div>
+</template>
+
+<script>
+export default {
+  async asyncData({ $microcms }) {
+    const works = await $microcms.get({
+      endpoint: 'works',
+      queries: { limit: 2 },
+    })
+    return {
+      works,
+    }
+  },
+}
+</script>
+
+<style lang="scss" scoped>
+.mainVisual {
+  img {
+    width: 100%;
+  }
+}
+
+.profile {
+  &__upper {
+    display: flex;
+    flex-direction: column-reverse;
+    margin-bottom: 0.5em;
+
+    @include mq() {
+      flex-direction: row-reverse;
+      justify-content: space-between;
+      margin-bottom: 2em;
+    }
+  }
+
+  &__text {
+    @include mq() {
+    }
+  }
+
+  &__name {
+    font-size: fz(24);
+    font-weight: bold;
+    margin-bottom: 0.5em;
+
+    @include mq() {
+      font-size: fz(28);
+      margin-bottom: 0.857em;
+    }
+
+    [lang='en'] {
+      font-size: fz(18);
+
+      &::before {
+        content: '/';
+        margin: 0 0.5em;
+      }
+    }
+  }
+
+  &__item {
+    margin-bottom: 0.5em;
+
+    @include mq() {
+      margin-bottom: 1em;
+    }
+  }
+
+  &__title {
+    font-size: fz(18);
+    font-weight: bold;
+    margin-bottom: 0.222em;
+
+    @include mq() {
+      margin-bottom: 0.444em;
+    }
+  }
+
+  &__image {
+    width: 100%;
+    margin-bottom: 1.75em;
+
+    @include mq() {
+      width: 40%;
+      margin: 0 2em 0 0;
+    }
+
+    img {
+      width: 100%;
+    }
+  }
+
+  &__message {
+    white-space: pre-wrap;
+  }
+}
+
+.works {
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+
+  &__item {
+    width: 100%;
+
+    @include mq() {
+      width: calc((100% - 2.5em) / 2);
+    }
+  }
+
+  &__item + &__item {
+    margin-top: 1.5em;
+
+    @include mq() {
+      margin: 0;
+    }
+  }
+
+  &__inner {
+    display: block;
+  }
+
+  &__image {
+    margin-bottom: 0.5em;
+
+    img {
+      width: 100%;
+    }
+  }
+
+  &__name {
+    font-weight: bold;
+  }
+
+  &__date {
+    font-size: fz(14);
+  }
+}
+</style>
+```
+
